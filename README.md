@@ -249,4 +249,4 @@ npm run preview
 - 소중한 의견은 도림천 산책로의 따뜻한 오프라인 공간 개선과 서비스 기능 고도화에 적극 반영됩니다.
 
 ---
-<p align="center">© 2026 별빛내린천 디지털 타임캡슐 팀. All rights reserved.</p>
+<p align="center">© 2026 별빛안부 팀. All rights reserved.</p>
