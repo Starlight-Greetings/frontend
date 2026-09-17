@@ -63,7 +63,7 @@ export default function WriteLetterModal() {
             <HelpCircle className="w-3.5 h-3.5" />
             <span>{currentLocation ? `${currentLocation.name}의 물음` : '도림천의 물음'}</span>
           </div>
-          <p className="text-sm font-medium text-white/90 leading-snug drop-shadow-sm">
+          <p className="text-sm font-medium text-white/90 leading-snug drop-shadow-sm break-keep">
             {currentLocation?.question || '오늘 도림천에 내려놓고 싶은 마음은 무엇인가요?'}
           </p>
         </div>
@@ -134,19 +134,19 @@ export default function WriteLetterModal() {
                   }`}
                 >
                   <div className={`w-3 h-3 rounded-full ${theme.dotColor} shadow-[0_0_8px_currentColor]`} />
-                  <span className="text-[11px]">{theme.label}</span>
+                  <span className="text-[11px] whitespace-nowrap">{theme.label}</span>
                 </button>
               ))}
             </div>
           </div>
 
           {/* 5. 하단 버튼 영역 */}
-          <div className="pt-3 flex space-x-3">
+          <div className="pt-3 flex space-x-2.5 sm:space-x-3">
             <button
               type="button"
               onClick={closeToRiver}
               disabled={isSubmitting}
-              className="w-1/3 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-slate-300 hover:text-white text-xs font-semibold transition active:scale-95"
+              className="w-1/3 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-slate-300 hover:text-white text-xs font-semibold transition active:scale-95 whitespace-nowrap shrink-0"
             >
               취소
             </button>
@@ -154,7 +154,7 @@ export default function WriteLetterModal() {
             <button
               type="submit"
               disabled={!canSubmit}
-              className={`w-2/3 py-3.5 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 transition-all duration-200 shadow-lg ${
+              className={`w-2/3 py-3.5 rounded-xl font-bold text-xs flex items-center justify-center space-x-1.5 sm:space-x-2 transition-all duration-200 shadow-lg whitespace-nowrap shrink-0 ${
                 canSubmit
                   ? 'bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white border border-cyan-400/50 shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:brightness-110 active:scale-95 cursor-pointer'
                   : 'bg-slate-800/80 text-slate-500 border border-slate-700/50 cursor-not-allowed'
@@ -162,13 +162,13 @@ export default function WriteLetterModal() {
             >
               {isSubmitting ? (
                 <>
-                  <Waves className="w-4 h-4 animate-spin text-cyan-300" />
-                  <span>물결에 띄우는 중...</span>
+                  <Waves className="w-4 h-4 animate-spin text-cyan-300 shrink-0" />
+                  <span className="whitespace-nowrap">물결에 띄우는 중...</span>
                 </>
               ) : (
                 <>
-                  <Send className="w-3.5 h-3.5 text-cyan-200" />
-                  <span>강물에 띄워 보내기</span>
+                  <Send className="w-3.5 h-3.5 text-cyan-200 shrink-0" />
+                  <span className="whitespace-nowrap">강물에 띄워 보내기</span>
                 </>
               )}
             </button>

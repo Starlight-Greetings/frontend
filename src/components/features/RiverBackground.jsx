@@ -23,11 +23,11 @@ export default function RiverBackground() {
       />
 
       {/* 2. 단계별 정교한 글래스모피즘 오버레이 */}
-      {/* 인트로: 상단 텍스트와 하단 카드 가독성을 위한 부드러운 상하 비네팅 */}
+      {/* 인트로: 상단 텍스트와 하단 카드 가독성을 위한 부드럽고 차분한 다크 비네팅 (눈부심 방지) */}
       <div
         className={`absolute inset-0 transition-opacity duration-1000 ${
           isIntro ? 'opacity-100' : 'opacity-0'
-        } bg-gradient-to-b from-slate-950/70 via-transparent to-slate-950/80`}
+        } bg-gradient-to-b from-slate-950/85 via-slate-950/70 to-slate-950/90`}
       />
 
       {/* 강물 뷰 / 모달: 유리병의 네온 글로우와 편지 가독성을 위한 딥 나이트 오버레이 */}

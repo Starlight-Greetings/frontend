@@ -60,25 +60,25 @@ export default function ReadLetterModal() {
         <ReactionButtons message={selectedMessage} onReact={reactToMessage} />
 
         {/* 하단 버튼 영역: 반응 전(가운데 정렬) -> 반응 후(왼쪽: 강물로 돌아가기 / 오른쪽: 설문조사 하러가기) */}
-        <div className={`pt-4 border-t border-white/10 mt-4 text-xs flex items-center transition-all duration-300 ${
-          hasReacted ? 'justify-between' : 'justify-center'
+        <div className={`pt-3 sm:pt-4 border-t border-white/10 mt-4 text-xs flex items-center gap-2 transition-all duration-300 ${
+          hasReacted ? 'justify-between flex-wrap sm:flex-nowrap' : 'justify-center'
         }`}>
           <button
             onClick={closeToRiver}
-            className="text-slate-300 hover:text-white flex items-center gap-1.5 py-1.5 transition underline underline-offset-4"
+            className="text-slate-300 hover:text-white flex items-center gap-1.5 py-1.5 transition underline underline-offset-4 shrink-0 whitespace-nowrap"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>강물로 돌아가기</span>
+            <ArrowLeft className="w-3.5 h-3.5 shrink-0" />
+            <span className="whitespace-nowrap">강물로 돌아가기</span>
           </button>
 
           {hasReacted && (
             <button
               onClick={openSurveyForm}
-              className="flex items-center space-x-1 px-3.5 py-1.5 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-400/40 text-cyan-200 hover:text-white font-semibold transition active:scale-95 shadow-md animate-fade-in"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-cyan-950/85 hover:bg-cyan-900 border border-cyan-400/40 text-cyan-200 hover:text-white font-semibold transition active:scale-95 shadow-md animate-fade-in shrink-0 whitespace-nowrap"
             >
-              <ClipboardCheck className="w-3.5 h-3.5 text-cyan-300" />
-              <span>설문조사 하러가기</span>
-              <ExternalLink className="w-3 h-3 text-cyan-300/80" />
+              <ClipboardCheck className="w-3.5 h-3.5 text-cyan-300 shrink-0" />
+              <span className="whitespace-nowrap">설문조사 하러가기</span>
+              <ExternalLink className="w-3 h-3 text-cyan-300/80 shrink-0" />
             </button>
           )}
         </div>

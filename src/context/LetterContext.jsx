@@ -5,13 +5,57 @@ import { INITIAL_MESSAGES, WEEKLY_TOPIC } from '../data/mockMessages';
 import { isDailyTopGuideSeenToday, markDailyTopGuideSeenToday } from '../utils/dateUtils';
 import { isSurveyAsked, markSurveyAsked, openSurveyForm } from '../utils/surveyUtils';
 
-// 4~5개 병의 자연스러운 수면 분산 좌표 프리셋
-const BOTTLE_POSITIONS = [
-  { top: '24%', left: '18%', animationDelay: '0s' },
-  { top: '46%', left: '66%', animationDelay: '1.1s' },
-  { top: '68%', left: '26%', animationDelay: '0.5s' },
-  { top: '35%', left: '52%', animationDelay: '1.7s' },
-  { top: '78%', left: '60%', animationDelay: '0.9s' }
+// 물결 젓기(셔플) 시 매번 새롭게 건져 올려질 6가지 다채로운 수면 리스폰 패턴 군
+// 모든 좌표는 상단 컨트롤 바와 하단 가이드 문구와 겹치지 않는 안전 수면 영역(top: 14%~56%, left: 20%~76%) 내 배치
+const BOTTLE_RESPAWN_PATTERNS = [
+  // 패턴 1: 지그재그 유선형 물결 (좌우 번갈아 흐름)
+  [
+    { top: '16%', left: '22%', animationDelay: '0s', animationClass: 'animate-float-slow' },
+    { top: '22%', left: '74%', animationDelay: '1.2s', animationClass: 'animate-float-wave' },
+    { top: '35%', left: '30%', animationDelay: '0.6s', animationClass: 'animate-float-gentle' },
+    { top: '44%', left: '70%', animationDelay: '1.8s', animationClass: 'animate-float-slow' },
+    { top: '56%', left: '24%', animationDelay: '0.9s', animationClass: 'animate-float-wave' }
+  ],
+  // 패턴 2: 별빛 소용돌이 흐름 (중앙 및 대각 곡선)
+  [
+    { top: '15%', left: '68%', animationDelay: '0.8s', animationClass: 'animate-float-gentle' },
+    { top: '25%', left: '26%', animationDelay: '0.2s', animationClass: 'animate-float-slow' },
+    { top: '34%', left: '58%', animationDelay: '1.5s', animationClass: 'animate-float-wave' },
+    { top: '46%', left: '22%', animationDelay: '1.0s', animationClass: 'animate-float-gentle' },
+    { top: '55%', left: '74%', animationDelay: '0.4s', animationClass: 'animate-float-slow' }
+  ],
+  // 패턴 3: 양안 분산 물결 (강변 양쪽으로 넓게 흩뿌려짐)
+  [
+    { top: '18%', left: '32%', animationDelay: '1.4s', animationClass: 'animate-float-slow' },
+    { top: '20%', left: '76%', animationDelay: '0.5s', animationClass: 'animate-float-gentle' },
+    { top: '36%', left: '48%', animationDelay: '1.9s', animationClass: 'animate-float-wave' },
+    { top: '50%', left: '26%', animationDelay: '0.7s', animationClass: 'animate-float-slow' },
+    { top: '56%', left: '68%', animationDelay: '1.2s', animationClass: 'animate-float-gentle' }
+  ],
+  // 패턴 4: 대각선 물무리 (우상단에서 좌하단으로 유영)
+  [
+    { top: '15%', left: '52%', animationDelay: '0.3s', animationClass: 'animate-float-wave' },
+    { top: '26%', left: '22%', animationDelay: '1.1s', animationClass: 'animate-float-slow' },
+    { top: '33%', left: '78%', animationDelay: '0.7s', animationClass: 'animate-float-gentle' },
+    { top: '45%', left: '46%', animationDelay: '1.6s', animationClass: 'animate-float-wave' },
+    { top: '56%', left: '24%', animationDelay: '1.3s', animationClass: 'animate-float-slow' }
+  ],
+  // 패턴 5: 밤하늘 성좌 클러스터 (은하수처럼 감성적 분산)
+  [
+    { top: '16%', left: '76%', animationDelay: '0.9s', animationClass: 'animate-float-gentle' },
+    { top: '27%', left: '44%', animationDelay: '0.4s', animationClass: 'animate-float-slow' },
+    { top: '38%', left: '22%', animationDelay: '1.7s', animationClass: 'animate-float-wave' },
+    { top: '48%', left: '70%', animationDelay: '0.6s', animationClass: 'animate-float-slow' },
+    { top: '55%', left: '42%', animationDelay: '1.4s', animationClass: 'animate-float-gentle' }
+  ],
+  // 패턴 6: 도림천 여울목 (잔잔한 호소와 급류의 조화)
+  [
+    { top: '18%', left: '24%', animationDelay: '1.0s', animationClass: 'animate-float-slow' },
+    { top: '17%', left: '64%', animationDelay: '0.2s', animationClass: 'animate-float-gentle' },
+    { top: '32%', left: '32%', animationDelay: '1.5s', animationClass: 'animate-float-wave' },
+    { top: '42%', left: '76%', animationDelay: '0.8s', animationClass: 'animate-float-slow' },
+    { top: '56%', left: '50%', animationDelay: '1.7s', animationClass: 'animate-float-gentle' }
+  ]
 ];
 
 export function LetterProvider({ children }) {
@@ -213,22 +257,28 @@ export function LetterProvider({ children }) {
   }, [messages, filterType, currentLocation]);
 
   // 9. 화면에 동시 노출할 엄선된 4~5개 유리병 계산 (강물 뷰)
+  // 물결을 저을 때(shuffleKey 증가 시)마다 6가지 다채로운 리스폰 지역 패턴 순환 및 랜덤 감성 부여
   const activeStreamBottles = useMemo(() => {
     const list = filteredMessages.length > 0 ? filteredMessages : messages;
     const maxCount = Math.min(5, list.length);
     if (maxCount === 0) return [];
 
-    // shuffleKey에 따라 윈도우 슬라이싱
-    const startIndex = (shuffleKey * 4) % list.length;
+    // shuffleKey에 따라 패턴 0~5 중 하나를 선택
+    const patternIndex = shuffleKey % BOTTLE_RESPAWN_PATTERNS.length;
+    const currentPattern = BOTTLE_RESPAWN_PATTERNS[patternIndex];
+
+    // 시작 메시지 인덱스도 shuffleKey에 따라 고르게 분산
+    const startIndex = (shuffleKey * 3 + patternIndex) % list.length;
     const selected = [];
 
     for (let i = 0; i < maxCount; i++) {
       const item = list[(startIndex + i) % list.length];
-      const pos = BOTTLE_POSITIONS[i % BOTTLE_POSITIONS.length];
+      const pos = currentPattern[i % currentPattern.length];
       selected.push({
         ...item,
         position: { top: pos.top, left: pos.left },
-        animationDelay: pos.animationDelay
+        animationDelay: pos.animationDelay,
+        animationClass: pos.animationClass
       });
     }
 
@@ -254,6 +304,7 @@ export function LetterProvider({ children }) {
         isDrawerOpen,
         setIsDrawerOpen,
         isShuffling,
+        shuffleKey,
         shuffleStream,
         startLocationCheck,
         resetLocation,

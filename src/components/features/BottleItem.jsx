@@ -37,7 +37,7 @@ export default function BottleItem({ message, onOpen, animationClass = 'animate-
 
   return (
     <div
-      className={`absolute cursor-pointer transition-all duration-300 group z-10 select-none ${animationClass}`}
+      className={`absolute cursor-pointer transition-all duration-300 group z-10 select-none -translate-x-1/2 -translate-y-1/2 scale-90 sm:scale-100 ${animationClass}`}
       style={{
         top: message.position?.top || '40%',
         left: message.position?.left || '40%',

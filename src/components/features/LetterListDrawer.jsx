@@ -51,7 +51,7 @@ export default function LetterListDrawer() {
           <div className="w-full flex space-x-1.5 mt-3 pt-1 overflow-x-auto pb-1 scrollbar-none">
             <button
               onClick={() => setFilterType('all')}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition shrink-0 ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition shrink-0 whitespace-nowrap ${
                 filterType === 'all'
                   ? 'bg-cyan-500/30 border-cyan-400 text-cyan-100 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
                   : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
@@ -62,39 +62,39 @@ export default function LetterListDrawer() {
 
             <button
               onClick={() => setFilterType('star-greeting')}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition shrink-0 flex items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition shrink-0 flex items-center gap-1 whitespace-nowrap ${
                 filterType === 'star-greeting'
                   ? 'bg-amber-500/30 border-amber-400 text-amber-100 shadow-[0_0_10px_rgba(251,191,36,0.3)]'
                   : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
               }`}
             >
-              <Sparkles className="w-3 h-3 text-amber-300" />
-              오늘의 별빛안부
+              <Sparkles className="w-3 h-3 text-amber-300 shrink-0" />
+              <span>오늘의 별빛안부</span>
             </button>
 
             <button
               onClick={() => setFilterType('weekly-topic')}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition shrink-0 flex items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition shrink-0 flex items-center gap-1 whitespace-nowrap ${
                 filterType === 'weekly-topic'
                   ? 'bg-indigo-500/30 border-indigo-400 text-indigo-100 shadow-[0_0_10px_rgba(99,102,241,0.3)]'
                   : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
               }`}
             >
-              <Heart className="w-3 h-3 text-rose-300" />
-              주제별 별빛안부
+              <Heart className="w-3 h-3 text-rose-300 shrink-0" />
+              <span>주제별 별빛안부</span>
             </button>
 
             {currentLocation && (
               <button
                 onClick={() => setFilterType('my-bridge')}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition shrink-0 flex items-center gap-1 ${
+                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition shrink-0 flex items-center gap-1 whitespace-nowrap ${
                   filterType === 'my-bridge'
                     ? 'bg-cyan-500/30 border-cyan-400 text-cyan-100 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
                     : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
                 }`}
               >
-                <MapPin className="w-3 h-3 text-cyan-300" />
-                {currentLocation.name}
+                <MapPin className="w-3 h-3 text-cyan-300 shrink-0" />
+                <span>{currentLocation.name}</span>
               </button>
             )}
           </div>
