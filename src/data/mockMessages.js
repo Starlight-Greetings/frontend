@@ -27,7 +27,7 @@ export const INITIAL_MESSAGES = [
   },
   {
     id: 3,
-    locationName: '동방1교',
+    locationName: '신림2교',
     timeAgo: '1시간 전',
     text: '혼자 걷다 보니 생각이 많아지네요. 이어폰을 빼고 물소리에 귀 기울여보세요. "잘하고 있어"라고 위로해 주는 것 같아요.',
     theme: 'rose',
@@ -37,7 +37,7 @@ export const INITIAL_MESSAGES = [
   },
   {
     id: 4,
-    locationName: '서원보도교',
+    locationName: '신림2교',
     timeAgo: '1시간 전',
     text: '지나간 일에 너무 자책하지 마세요. 도림천 물결처럼 슬픈 기억들도 조용히 흘러갈 거예요.',
     theme: 'emerald',
@@ -67,7 +67,7 @@ export const INITIAL_MESSAGES = [
   },
   {
     id: 7,
-    locationName: '동방1교',
+    locationName: '신림2교',
     timeAgo: '4시간 전',
     text: '오늘 시험 결과를 받고 속상했는데, 도림천 불빛을 보며 다시 마음을 다잡습니다. 모두 다 잘 될 거예요.',
     theme: 'rose',
@@ -77,7 +77,7 @@ export const INITIAL_MESSAGES = [
   },
   {
     id: 8,
-    locationName: '서원보도교',
+    locationName: '신림2교',
     timeAgo: '5시간 전',
     text: '물에 비친 불빛들이 마치 밤하늘 별가루 같아요. 이 글을 읽는 당신의 오늘 안부도 한결 편안해지길.',
     theme: 'emerald',
@@ -107,7 +107,7 @@ export const INITIAL_MESSAGES = [
   },
   {
     id: 11,
-    locationName: '동방1교',
+    locationName: '신림2교',
     timeAgo: '어제',
     text: '고시촌 생활 2년 차, 지칠 때마다 도림천을 걸으며 서로 안부를 묻습니다. 포기하지 않고 걸어가는 것만으로도 빛납니다.',
     theme: 'rose',
@@ -117,7 +117,7 @@ export const INITIAL_MESSAGES = [
   },
   {
     id: 12,
-    locationName: '서원보도교',
+    locationName: '신림2교',
     timeAgo: '2일 전',
     text: '밤바람이 시원하네요. 산책로에서 마주치는 모든 분들의 발걸음에 자그마한 온기가 더해지길 소망합니다.',
     theme: 'emerald',

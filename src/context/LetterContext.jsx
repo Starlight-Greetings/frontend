@@ -1,9 +1,24 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { LetterContext } from './createLetterContext';
 import { LOCATIONS } from '../data/locations';
 import { INITIAL_MESSAGES, WEEKLY_TOPIC } from '../data/mockMessages';
 import { isDailyTopGuideSeenToday, markDailyTopGuideSeenToday } from '../utils/dateUtils';
 import { isSurveyAsked, markSurveyAsked, openSurveyForm } from '../utils/surveyUtils';
+
+// URL 파라미터(?spot=...) 분석 헬퍼
+function resolveSpotFromUrl() {
+  if (typeof window === 'undefined') return null;
+  const params = new URLSearchParams(window.location.search);
+  const spotParam = params.get('spot');
+  if (!spotParam) return null;
+
+  const clean = decodeURIComponent(spotParam).trim().toLowerCase();
+  if (clean === 'sillim' || clean === '신림교' || clean === '1' || clean === 'bridge1') return LOCATIONS.sillim;
+  if (clean === 'bongnim' || clean === '봉림교' || clean === '2' || clean === 'bridge2') return LOCATIONS.bongnim;
+  if (clean === 'sillim2' || clean === '신림2교' || clean === '3' || clean === 'bridge3' || clean === 'dongbang' || clean === 'seowon') return LOCATIONS.sillim2;
+  if (LOCATIONS[clean]) return LOCATIONS[clean];
+  return null;
+}
 
 // 물결 젓기(셔플) 시 매번 새롭게 건져 올려질 6가지 다채로운 수면 리스폰 패턴 군
 // 모든 좌표는 상단 컨트롤 바와 하단 가이드 문구와 겹치지 않는 안전 수면 영역(top: 14%~56%, left: 20%~76%) 내 배치
@@ -59,8 +74,10 @@ const BOTTLE_RESPAWN_PATTERNS = [
 ];
 
 export function LetterProvider({ children }) {
-  const [step, setStep] = useState('intro'); // 'intro' | 'river' | 'read' | 'write'
-  const [currentLocation, setCurrentLocation] = useState(null);
+  const initialSpot = useMemo(() => resolveSpotFromUrl(), []);
+  const [step, setStep] = useState(() => (initialSpot ? 'river' : 'map')); // 'map' | 'river' | 'read' | 'write'
+  const [currentLocation, setCurrentLocation] = useState(() => initialSpot);
+  const [selectedMapSpot, setSelectedMapSpot] = useState(() => initialSpot || LOCATIONS.sillim);
   const [isLocating, setIsLocating] = useState(false);
   const [locatingBridgeName, setLocatingBridgeName] = useState('');
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
@@ -101,10 +118,12 @@ export function LetterProvider({ children }) {
     openSurveyForm();
   }, []);
 
-  // 대규모 편지 관리: 필터 및 서랍(바텀시트), 셔플 상태
-  const [filterType, setFilterType] = useState('all'); // 'all' | 'my-bridge' | 'popular' | 'recent'
+  // 대규모 편지 관리: 3대 핵심 카테고리 필터링 (현재 교 오늘 베스트 Top5 / 현재 교 주제별 Top5 / 전체 교 주제별 Top5)
+  const [filterType, setFilterType] = useState('bridge-daily-best'); // 'bridge-daily-best' | 'bridge-weekly-best' | 'all-weekly-best'
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isShuffling, setIsShuffling] = useState(false);
+  const [shufflePhase, setShufflePhase] = useState('idle'); // 'idle' | 'departing' | 'arriving'
+  const isShuffling = shufflePhase !== 'idle';
+  const isDeparting = shufflePhase === 'departing';
   const [shuffleKey, setShuffleKey] = useState(0);
 
   // 토스트 메시지 상태
@@ -117,26 +136,34 @@ export function LetterProvider({ children }) {
     }, 2800);
   }, []);
 
-  // 1. QR 인증 및 위치 체크
-  const startLocationCheck = useCallback((locKey) => {
-    const targetLoc = LOCATIONS[locKey];
-    if (!targetLoc) return;
+  // URL ?spot=... 으로 직행 접속한 경우 환영 토스트 알림
+  useEffect(() => {
+    if (initialSpot) {
+      triggerToast(`📍 ${initialSpot.name} 스팟에 QR로 즉시 입장했습니다.`, 'info');
+    }
+  }, [initialSpot, triggerToast]);
 
-    setLocatingBridgeName(targetLoc.name);
-    setIsLocating(true);
+  // 1. 다리 입장 (즉시 입장)
+  const enterBridge = useCallback((locKeyOrObj) => {
+    let target = locKeyOrObj;
+    if (typeof locKeyOrObj === 'string') {
+      target = LOCATIONS[locKeyOrObj] || LOCATIONS.sillim;
+    }
+    if (!target) return;
 
-    setTimeout(() => {
-      setCurrentLocation(targetLoc);
-      setIsLocating(false);
-      setStep('river');
-      triggerToast(`📍 ${targetLoc.name} 스팟에 접속했습니다.`, 'info');
-    }, 1400);
+    setCurrentLocation(target);
+    setSelectedMapSpot(target);
+    setStep('river');
+    triggerToast(`📍 ${target.name} 물결에 입장했습니다.`, 'info');
   }, [triggerToast]);
 
-  // 다리 재설정 (인트로로 복귀)
-  const resetLocation = useCallback(() => {
-    setStep('intro');
+  // 도림천 미니맵으로 복귀
+  const goToMap = useCallback(() => {
+    setStep('map');
   }, []);
+
+  const resetLocation = goToMap;
+  const startLocationCheck = enterBridge;
 
   // 2. 유리병 열기
   const openBottle = useCallback((msg) => {
@@ -228,38 +255,63 @@ export function LetterProvider({ children }) {
     }
   }, [selectedMessage, triggerToast]);
 
-  // 7. 물결 젓기 (셔플) 기능
+  // 7. 물결 젓기 (셔플) 기능 고도화 (퇴장 -> 수면 소용돌이 -> 새 유리병 순차 부력 등장)
   const shuffleStream = useCallback(() => {
     if (isShuffling) return;
-    setIsShuffling(true);
+    setShufflePhase('departing'); // 1단계: 기존 병들이 물살을 타고 부드럽게 흘러내려감 (400ms)
 
     setTimeout(() => {
-      setShuffleKey(prev => prev + 1);
-      setIsShuffling(false);
-      triggerToast('🌊 물결을 저어 새로운 유리병들을 건져 올렸습니다.', 'info');
-    }, 500);
+      setShuffleKey(prev => prev + 1); // 2단계: 새 유리병 세트 & 새 좌표 로드
+      setShufflePhase('arriving'); // 새 유리병들이 수면 위로 차례대로 떠오름
+
+      setTimeout(() => {
+        setShufflePhase('idle');
+        triggerToast('🌊 물결을 저어 새로운 유리병들을 건져 올렸습니다.', 'info');
+      }, 700);
+    }, 420);
   }, [isShuffling, triggerToast]);
 
-  // 8. 필터링된 전체 목록 계산 (오늘의 별빛안부 & 주제별 별빛안부 정교 지원)
+  // 8. 서랍장 3대 핵심 카테고리 필터링 계산
+  // 1) 현재 교의 오늘 베스트 TOP 5
+  // 2) 현재 교의 주간 주제별 베스트 TOP 5
+  // 3) 도림천 모든 교 합산 주간 주제별 베스트 TOP 5
   const filteredMessages = useMemo(() => {
-    let list = [...messages];
-    if (filterType === 'weekly-topic') {
-      list = list.filter(m => m.isWeeklyTopic);
-    } else if (filterType === 'star-greeting') {
-      list.sort((a, b) => (b.reacts.cheer || 0) - (a.reacts.cheer || 0));
-    } else if (filterType === 'my-bridge' && currentLocation) {
-      list = list.filter(m => m.locationName === currentLocation.name);
-    } else if (filterType === 'popular') {
-      list.sort((a, b) => (b.reacts.cheer * 2 + b.reacts.heart) - (a.reacts.cheer * 2 + a.reacts.heart));
+    const curName = currentLocation ? currentLocation.name : '신림교';
+
+    if (filterType === 'bridge-weekly-best') {
+      // 1. 현재 교의 주간 주제별 베스트 Top 5
+      const pool = messages.filter(m => m.locationName === curName && m.isWeeklyTopic);
+      const sorted = [...pool].sort((a, b) => 
+        ((b.reacts?.cheer || 0) * 2 + (b.reacts?.heart || 0)) - 
+        ((a.reacts?.cheer || 0) * 2 + (a.reacts?.heart || 0))
+      );
+      return sorted.slice(0, 5);
+    } else if (filterType === 'all-weekly-best') {
+      // 2. 도림천 전체(모든 교 합산) 주간 주제별 베스트 Top 5
+      const pool = messages.filter(m => m.isWeeklyTopic);
+      const sorted = [...pool].sort((a, b) => 
+        ((b.reacts?.cheer || 0) * 2 + (b.reacts?.heart || 0)) - 
+        ((a.reacts?.cheer || 0) * 2 + (a.reacts?.heart || 0))
+      );
+      return sorted.slice(0, 5);
+    } else {
+      // 3. 기본값: 현재 교의 오늘 하루 기준 베스트 Top 5
+      const pool = messages.filter(m => m.locationName === curName);
+      const sorted = [...pool].sort((a, b) => 
+        ((b.reacts?.cheer || 0) * 2 + (b.reacts?.heart || 0)) - 
+        ((a.reacts?.cheer || 0) * 2 + (a.reacts?.heart || 0))
+      );
+      return sorted.slice(0, 5);
     }
-    // 기본은 최신 등록순
-    return list;
   }, [messages, filterType, currentLocation]);
 
   // 9. 화면에 동시 노출할 엄선된 4~5개 유리병 계산 (강물 뷰)
-  // 물결을 저을 때(shuffleKey 증가 시)마다 6가지 다채로운 리스폰 지역 패턴 순환 및 랜덤 감성 부여
+  // 현재 접속한 다리의 편지를 우선 부유시키며, shuffleKey 증가 시마다 6가지 리스폰 패턴 순환
   const activeStreamBottles = useMemo(() => {
-    const list = filteredMessages.length > 0 ? filteredMessages : messages;
+    const bridgePool = currentLocation 
+      ? messages.filter(m => m.locationName === currentLocation.name)
+      : messages;
+    const list = bridgePool.length >= 4 ? bridgePool : messages;
     const maxCount = Math.min(5, list.length);
     if (maxCount === 0) return [];
 
@@ -283,7 +335,7 @@ export function LetterProvider({ children }) {
     }
 
     return selected;
-  }, [filteredMessages, messages, shuffleKey]);
+  }, [messages, currentLocation, shuffleKey]);
 
   return (
     <LetterContext.Provider
@@ -304,8 +356,14 @@ export function LetterProvider({ children }) {
         isDrawerOpen,
         setIsDrawerOpen,
         isShuffling,
+        isDeparting,
+        shufflePhase,
         shuffleKey,
         shuffleStream,
+        enterBridge,
+        goToMap,
+        selectedMapSpot,
+        setSelectedMapSpot,
         startLocationCheck,
         resetLocation,
         openBottle,

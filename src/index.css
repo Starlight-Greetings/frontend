@@ -93,6 +93,80 @@
   }
 }
 
+@keyframes bottleEmerge {
+  0% {
+    opacity: 0;
+    transform: translateY(36px) scale(0.4) rotate(-10deg);
+    filter: blur(5px);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(-8px) scale(1.1) rotate(4deg);
+    filter: blur(0px);
+  }
+  85% {
+    transform: translateY(3px) scale(0.97) rotate(-2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px) scale(1) rotate(0deg);
+    filter: blur(0px);
+  }
+}
+
+@keyframes bottleDepart {
+  0% {
+    opacity: 1;
+    transform: translateY(0px) translateX(0px) scale(1) rotate(0deg);
+    filter: blur(0px);
+  }
+  45% {
+    opacity: 0.8;
+    transform: translateY(16px) translateX(15px) scale(0.85) rotate(10deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(48px) translateX(38px) scale(0.35) rotate(24deg);
+    filter: blur(6px);
+  }
+}
+
+@keyframes waterWhirlpool {
+  0% {
+    opacity: 0;
+    transform: rotate(0deg) scale(0.3);
+  }
+  30% {
+    opacity: 0.9;
+    transform: rotate(140deg) scale(0.85);
+  }
+  70% {
+    opacity: 0.6;
+    transform: rotate(320deg) scale(1.3);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(450deg) scale(1.8);
+  }
+}
+
+@keyframes waterStirWave {
+  0% {
+    transform: scale(0.2);
+    opacity: 0.95;
+    border-color: rgba(6, 182, 212, 0.8);
+  }
+  50% {
+    opacity: 0.6;
+    border-color: rgba(56, 189, 248, 0.6);
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+    border-color: rgba(99, 102, 241, 0);
+  }
+}
+
 .animate-float-slow {
   animation: floatSlow 4s ease-in-out infinite;
 }
@@ -119,6 +193,22 @@
 
 .animate-float-away {
   animation: floatAway 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-bottle-emerge {
+  animation: bottleEmerge 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-bottle-depart {
+  animation: bottleDepart 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-water-whirlpool {
+  animation: waterWhirlpool 0.85s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+.animate-water-stir-wave {
+  animation: waterStirWave 0.85s cubic-bezier(0, 0.2, 0.8, 1) forwards;
 }
 
 /* Glassmorphism Utilities with comfortable dark contrast */

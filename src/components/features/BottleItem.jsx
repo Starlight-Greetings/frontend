@@ -32,19 +32,36 @@ const THEME_STYLES = {
   }
 };
 
-export default function BottleItem({ message, onOpen, animationClass = 'animate-float-slow' }) {
+export default function BottleItem({
+  message,
+  onOpen,
+  animationClass = 'animate-float-slow',
+  index = 0,
+  isDeparting = false
+}) {
   const theme = THEME_STYLES[message.theme] || THEME_STYLES.cyan;
+  // 순차적 등장 딜레이 (index 0: 0ms, 1: 140ms, 2: 280ms, 3: 420ms, 4: 560ms)
+  const emergeDelay = `${index * 140}ms`;
 
   return (
     <div
-      className={`absolute cursor-pointer transition-all duration-300 group z-10 select-none -translate-x-1/2 -translate-y-1/2 scale-90 sm:scale-100 ${animationClass}`}
+      className={`absolute cursor-pointer z-10 select-none -translate-x-1/2 -translate-y-1/2 ${
+        isDeparting ? 'animate-bottle-depart pointer-events-none' : 'animate-bottle-emerge'
+      }`}
       style={{
         top: message.position?.top || '40%',
         left: message.position?.left || '40%',
-        animationDelay: message.animationDelay || '0s'
+        animationDelay: isDeparting ? '0ms' : emergeDelay
       }}
       onClick={() => onOpen(message)}
     >
+      {/* 내부 부유 래퍼: 지속적인 잔잔한 수면 물결 부유 루프 */}
+      <div
+        className={`relative group scale-90 sm:scale-100 ${animationClass}`}
+        style={{
+          animationDelay: message.animationDelay || `${index * 0.4}s`
+        }}
+      >
       {/* 1. 물결 파동 효과 (병 아래 잔물결) */}
       <div
         className="absolute -inset-4 rounded-full animate-water-ripple pointer-events-none"
@@ -147,5 +164,6 @@ export default function BottleItem({ message, onOpen, animationClass = 'animate-
         </span>
       </div>
     </div>
-  );
+  </div>
+);
 }

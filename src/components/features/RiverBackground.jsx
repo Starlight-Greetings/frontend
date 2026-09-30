@@ -1,39 +1,41 @@
 import { useLetter } from '../../hooks/useLetter';
 
 export default function RiverBackground() {
-  const { step } = useLetter();
-  const isIntro = step === 'intro';
+  const { step, currentLocation } = useLetter();
+  const isMap = step === 'map' || step === 'intro';
+
+  // 다리별 고유 야경 배경 이미지 (신림교: sillim_bridge_night.jpg / 봉림교: image_e57129.jpg / 신림2교: sillim2_bridge_night.jpg)
+  const currentBgImage = isMap
+    ? '/dorimcheon_map_night.jpg'
+    : (currentLocation?.bgImage || '/image_e57129.jpg');
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-      {/* 1. 옵션 B: 감성적인 별빛내린천 야경 3D 일러스트 배경 (public/dorimcheon_night_illust.jpg)
-          - 9:16 모바일 비율의 시네마틱 아트
-          - 인트로: 은하수와 다리가 시원하게 펼쳐지는 뷰
-          - 강물뷰/모달: 물결과 반짝이는 빛망울 쪽으로 부드럽게 줌인(1초 트랜지션)
-      */}
+      {/* 1. 다리별 실제 야경 배경화면 */}
       <div
-        className={`absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-out ${
-          isIntro
-            ? 'scale-100 translate-y-0 brightness-100 contrast-100 blur-none'
-            : 'scale-110 translate-y-3 brightness-[0.75] contrast-[1.1] blur-[1px]'
+        key={currentBgImage}
+        className={`absolute inset-0 bg-cover bg-center transition-all duration-700 ease-out animate-fade-in ${
+          isMap
+            ? 'scale-100 translate-y-0 brightness-[0.85] contrast-[1.05] blur-none'
+            : 'scale-105 translate-y-2 brightness-[0.72] contrast-[1.1] blur-[0.5px]'
         }`}
         style={{
-          backgroundImage: `url('/image_e57129.jpg')`,
+          backgroundImage: `url('${currentBgImage}')`,
         }}
       />
 
       {/* 2. 단계별 정교한 글래스모피즘 오버레이 */}
-      {/* 인트로: 상단 텍스트와 하단 카드 가독성을 위한 부드럽고 차분한 다크 비네팅 (눈부심 방지) */}
+      {/* 지도 뷰: 하천과 도시 불빛이 선명하게 보이도록 가벼운 다크 비네팅 */}
       <div
         className={`absolute inset-0 transition-opacity duration-1000 ${
-          isIntro ? 'opacity-100' : 'opacity-0'
-        } bg-gradient-to-b from-slate-950/85 via-slate-950/70 to-slate-950/90`}
+          isMap ? 'opacity-100' : 'opacity-0'
+        } bg-gradient-to-b from-slate-950/70 via-slate-950/40 to-slate-950/80`}
       />
 
       {/* 강물 뷰 / 모달: 유리병의 네온 글로우와 편지 가독성을 위한 딥 나이트 오버레이 */}
       <div
         className={`absolute inset-0 transition-opacity duration-1000 ${
-          !isIntro ? 'opacity-100' : 'opacity-0'
+          !isMap ? 'opacity-100' : 'opacity-0'
         } bg-gradient-to-b from-slate-950/80 via-slate-950/40 to-slate-950/90`}
       />
 

@@ -20,6 +20,7 @@ export default function RiverView() {
     shuffleStream,
     shuffleKey,
     isShuffling,
+    isDeparting,
     setIsDrawerOpen
   } = useLetter();
 
@@ -49,7 +50,9 @@ export default function RiverView() {
               className="px-2.5 py-1.5 rounded-xl bg-cyan-950/80 border border-cyan-400/35 text-cyan-200 text-xs font-medium flex items-center space-x-1 hover:bg-cyan-900 transition active:scale-95 disabled:opacity-60 shadow-md shrink-0 whitespace-nowrap"
             >
               <RotateCw className={`w-3 h-3 shrink-0 ${isShuffling ? 'animate-spin text-cyan-400' : ''}`} />
-              <span className="text-[11px] whitespace-nowrap">물결 젓기</span>
+              <span className="text-[11px] whitespace-nowrap">
+                {isShuffling ? '물결 젓는 중...' : '물결 젓기'}
+              </span>
             </button>
 
             {/* 전체 편지 서랍장 버튼 */}
@@ -65,11 +68,23 @@ export default function RiverView() {
       </div>
 
       {/* 2. 도림천 강물 위를 부유하는 엄선된 4~5개 유리병들 */}
-      <div className={`flex-1 relative overflow-hidden transition-all duration-300 ${isShuffling ? 'opacity-20 scale-95' : 'opacity-100 scale-100'}`}>
+      <div className="flex-1 relative overflow-hidden">
+        {/* 물결 젓기 시 수면 중앙에 퍼져나가는 소용돌이 물빛 이펙트 */}
+        {isShuffling && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+            <div className="w-72 h-72 rounded-full border border-cyan-400/40 animate-water-whirlpool opacity-80" />
+            <div className="w-52 h-52 rounded-full border-2 border-cyan-300/60 animate-water-stir-wave opacity-90" />
+            <div className="w-32 h-32 rounded-full bg-cyan-400/25 blur-xl animate-pulse" />
+          </div>
+        )}
+
+        {/* 순차적 부력 등장(Staggered Emergence) 유리병들 */}
         {activeStreamBottles.map((msg, index) => (
           <BottleItem
             key={`${msg.id}-${shuffleKey}`}
             message={msg}
+            index={index}
+            isDeparting={isDeparting}
             onOpen={openBottle}
             animationClass={msg.animationClass || ANIMATION_CLASSES[index % ANIMATION_CLASSES.length]}
           />
